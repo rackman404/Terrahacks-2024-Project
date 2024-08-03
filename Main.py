@@ -14,6 +14,8 @@ class MainWidget(QtWidgets.QMainWindow): #Main Class
         super(MainWidget, self).__init__()
         self.threadpool = QtCore.QThreadPool()
 
+        self.resize(1920, 1080)
+
 
         self.mainWindowUI = MainWindow.mainWindowUI()
         self.mainWindowUI.setup(self)
