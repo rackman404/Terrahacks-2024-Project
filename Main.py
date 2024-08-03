@@ -29,6 +29,7 @@ class MainWidget(QtWidgets.QMainWindow): #Main Class
         self.setCentralWidget(widget)
 
         #signal - interactions
+        
        
 
 

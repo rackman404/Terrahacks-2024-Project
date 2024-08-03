@@ -7,6 +7,7 @@ class EditSceneUI(object):
     def setup(self, EditScene):
         #create buttons, labels, etc objects
         self.testLabel = QtWidgets.QLabel("edit scene")
+    
 
         #initialize layout
         self.EditSceneLayoutContainer = QtWidgets.QWidget()

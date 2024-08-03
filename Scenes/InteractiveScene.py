@@ -11,3 +11,5 @@ class InteractiveSceneUI(object):
         self.interactiveSceneLayout = QtWidgets.QGridLayout(self.interactiveSceneLayoutContainer)
 
         self.interactiveSceneLayout.addChildWidget(self.testLabel)
+
+        
