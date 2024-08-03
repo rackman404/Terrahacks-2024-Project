@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Kitchen Simulator</title>
+  <link rel="icon" type="image/x-icon" href="/Resources/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <script src="script.js" type="module" defer></script>
+</head>
+
+<body>
+  <div class="sidenav">
+    <div class="sidenavtop">
+      <h3 style="color:white; text-align:center"> Kitchen Items </h3>
+      <b style="color:white; text-align:center"> (click to select) </b>
+    </div>
+    <div id="drag-fridge" class="drag-item drag-fridge">
+      <img src='Resources/Fridge.png' alt="Fridge" width="200" height="300">
+    </div>
+    <div id="drag-sink" class="drag-item drag-sink">
+      <img src='Resources/Sink.png' alt="Sink" width="100" height="100">
+    </div>
+    <div id="drag-cabinet" class="drag-item drag-cabinet">
+      <img src='Resources/Cabinets.png' alt="Cabinet" width="200" height="100">
+    </div>
+    <div id="drag-stove" class="drag-item drag-stove">
+      <img src='Resources/Stove.png' alt="Stove" width="200" height="200">
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="header">
+      <h3 style="color:white; text-align:center"> Kitchen Planner </h3>
+    </div>
+
+    <div id="grid-container" class="grid-container"></div>
+    <div id="warning-container" class="warning-container" style="display: none;">
+      <p>Are you sure you want to delete this item?</p>
+      <button id="confirm-delete">Yes, delete</button>
+      <button id="cancel-delete">Cancel</button>
+    </div>
+  </div>
+
+  <div class="sidenav2" id="sidenav2" style="display: none;">
+    <h3>Options</h3>
+    <button id="delete-item">Delete</button>
+    <button id="add-food" style="display: none;">Add Food Item</button>
+    <div id="food-list-container">
+      <h4>Food Items</h4>
+      <table id="food-list">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Qty</th>
+            <th>Expiry Date</th>
+            <th>Remove Buttons</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Food items will be appended here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="food-modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h4>Add Food Item</h4>
+      <label for="food-name">Name:</label>
+      <input type="text" id="food-name">
+      <label for="food-qty">Quantity:</label>
+      <input type="number" id="food-qty">
+      <label for="food-expiry">Expiry Date:</label>
+      <input type="date" id="food-expiry">
+      <button id="save-food">Save Food Item</button>
+    </div>
+  </div>
+</body>
+
+</html>
