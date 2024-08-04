@@ -2,6 +2,9 @@ let selectedItem = null;
 let selectedCell = null;
 let movingItem = false;
 
+// Store food items for each cell using cell IDs
+const foodItems = {};
+
 // Function to create the grid
 function createGrid(rows, cols) {
   const gridContainer = document.getElementById('grid-container');
@@ -21,13 +24,11 @@ function createGrid(rows, cols) {
 
 // Function to handle item selection
 function selectItem(event) {
-  // Remove 'selected' class from previously selected item
   const previouslySelected = document.querySelector('.drag-item.selected');
   if (previouslySelected) {
     previouslySelected.classList.remove('selected');
   }
 
-  // Set the clicked item as selected
   selectedItem = event.currentTarget;
   selectedItem.classList.add('selected');
   movingItem = false;
@@ -38,18 +39,23 @@ function handleCellClick(event) {
   const cell = event.currentTarget;
   if (selectedItem && !movingItem) {
     if (cell.children.length === 0) {
-      // Place item into cell
       const itemClone = selectedItem.cloneNode(true); // Clone the selected item
       itemClone.onclick = handleCellItemClick; // Add click event to cloned item
       cell.innerHTML = '';
       cell.appendChild(itemClone);
+
+      // Initialize food items for the new cell if not exists
+      const cellId = cell.id;
+      if (!foodItems[cellId]) {
+        foodItems[cellId] = [];
+      }
+
       // Clear the selection
       selectedItem.classList.remove('selected');
       selectedItem = null;
     }
   } else if (movingItem) {
     if (cell.children.length === 0) {
-      // Move the item to the new cell
       cell.appendChild(selectedItem);
       selectedCell.innerHTML = ''; // Clear the previous cell
       selectedCell = null;
@@ -58,32 +64,78 @@ function handleCellClick(event) {
       document.getElementById('sidenav2').style.display = 'none';
     }
   } else {
-    // Display options if an item is clicked in the cell
     if (event.currentTarget.children.length > 0) {
       selectedCell = event.currentTarget;
-      showOptions(selectedCell.children[0].id);
+      const cellId = event.currentTarget.id;
+      showOptions(cellId);
     }
   }
 }
 
-// Function to show options for selected item
-function showOptions(itemId) {
+// Function to show options for selected cell
+function showOptions(cellId) {
   document.getElementById('sidenav2').style.display = 'flex';
   const addFoodButton = document.getElementById('add-food');
   const foodListContainer = document.getElementById('food-list-container');
-  if (itemId.includes('fridge') || itemId.includes('cabinet')) {
-    addFoodButton.style.display = 'block';
-    foodListContainer.style.display = 'block';
+  if (selectedItem.id.includes('fridge') || selectedItem.id.includes('cabinet')) {
+    // Show options related to fridge
+    document.getElementById('add-food').style.display = 'block';
+    document.getElementById('food-list-container').style.display = 'block';
   } else {
-    addFoodButton.style.display = 'none';
-    foodListContainer.style.display = 'none';
+    // Hide options related to non-fridge items
+    document.getElementById('add-food').style.display = 'none';
+    document.getElementById('food-list-container').style.display = 'none';
+  }
+  displayFoodItems(cellId);
+}
+
+// Function to display food items in the table
+function displayFoodItems(cellId) {
+  const tableBody = document.querySelector('#food-list tbody');
+  tableBody.innerHTML = ''; // Clear existing items
+
+  if (!foodItems[cellId]) {
+    foodItems[cellId] = [];
+  }
+
+  foodItems[cellId].forEach(item => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${item.name}</td>
+      <td>${item.qty}</td>
+      <td>${item.expiry}</td>
+      <td><button class="remove-food-item" data-cell-id="${cellId}" data-item-name="${item.name}">Remove</button></td>
+    `;
+    tableBody.appendChild(row);
+  });
+}
+
+// Function to handle remove button click
+function handleRemoveFoodItemClick(event) {
+  if (event.target && event.target.classList.contains('remove-food-item')) {
+    const cellId = event.target.dataset.cellId;
+    const itemName = event.target.dataset.itemName;
+    removeFoodItem(cellId, itemName); // Call removeFoodItem with parameters
   }
 }
+
+// Function to remove food item
+function removeFoodItem(cellId, itemName) {
+  if (foodItems[cellId]) {
+    foodItems[cellId] = foodItems[cellId].filter(item => item.name !== itemName);
+    displayFoodItems(cellId); // Refresh the food list display
+  }
+}
+
+// Attach event listener to table body for removing food items
+document.querySelector('#food-list tbody').addEventListener('click', handleRemoveFoodItemClick);
+
 
 // Function to delete selected item
 function deleteItem() {
   if (selectedCell) {
     selectedCell.innerHTML = ''; // Remove item from cell
+    delete foodItems[selectedCell.id]; // Remove food items list for the cell
     selectedCell = null;
   }
   document.getElementById('sidenav2').style.display = 'none';
@@ -94,7 +146,7 @@ function handleCellItemClick(event) {
   selectedCell = event.currentTarget.parentElement;
   selectedItem = event.currentTarget;
   movingItem = true;
-  showOptions(event.currentTarget.id);
+  showOptions(event.currentTarget.parentElement.id);
   event.stopPropagation();
 }
 
@@ -105,6 +157,8 @@ createGrid(4, 6); // Create a 4x6 grid
 const dragItems = document.querySelectorAll('.drag-item');
 dragItems.forEach(item => {
   item.onclick = selectItem;
+  // Ensure each drag item has a unique identifier
+  item.dataset.itemId = item.id; // Set a unique ID for each drag item
 });
 
 // Attach event listener to delete button
@@ -138,7 +192,12 @@ document.getElementById('save-food').onclick = function() {
   const expiry = document.getElementById('food-expiry').value;
 
   if (name && qty && expiry) {
-    addFoodToList(name, qty, expiry);
+    const cellId = selectedCell.id;
+    if (!foodItems[cellId]) {
+      foodItems[cellId] = [];
+    }
+    foodItems[cellId].push({ name, qty, expiry });
+    displayFoodItems(cellId); // Refresh the food list display
     modal.style.display = 'none';
     // Clear input fields after submission
     document.getElementById('food-name').value = '';
@@ -149,16 +208,7 @@ document.getElementById('save-food').onclick = function() {
   }
 };
 
-// Function to add food item to the list
-function addFoodToList(name, qty, expiry) {
-  const tableBody = document.querySelector('#food-list tbody');
-  const row = document.createElement('tr');
-
-  row.innerHTML = `
-    <td>${name}</td>
-    <td>${qty}</td>
-    <td>${expiry}</td>
-  `;
-
-  tableBody.appendChild(row);
-}
+const xButton = document.getElementById('xButton');
+xButton.addEventListener('click', () => {
+  document.getElementById('sidenav2').style.display = 'none';
+})
